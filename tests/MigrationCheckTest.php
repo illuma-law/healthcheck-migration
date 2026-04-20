@@ -3,14 +3,14 @@
 declare(strict_types=1);
 
 use IllumaLaw\HealthCheckMigration\MigrationBacklogCheck;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Contracts\Console\Kernel;
 use Spatie\Health\Enums\Status;
 
 it('succeeds when there are no pending migrations', function () {
-    $mock = Mockery::mock(Illuminate\Contracts\Console\Kernel::class);
+    $mock = Mockery::mock(Kernel::class);
     $mock->shouldReceive('call')->once()->andReturn(0);
     $mock->shouldReceive('output')->once()->andReturn("No pending migrations found.\n");
-    $this->app->instance(Illuminate\Contracts\Console\Kernel::class, $mock);
+    $this->app->instance(Kernel::class, $mock);
 
     $result = MigrationBacklogCheck::new()->run();
 
@@ -19,10 +19,10 @@ it('succeeds when there are no pending migrations', function () {
 });
 
 it('fails when there are pending migrations', function () {
-    $mock = Mockery::mock(Illuminate\Contracts\Console\Kernel::class);
+    $mock = Mockery::mock(Kernel::class);
     $mock->shouldReceive('call')->once()->andReturn(0);
     $mock->shouldReceive('output')->once()->andReturn("2023_01_01_000000_create_users_table ........................... Pending\n2023_01_01_000001_create_posts_table ........................... Pending\n");
-    $this->app->instance(Illuminate\Contracts\Console\Kernel::class, $mock);
+    $this->app->instance(Kernel::class, $mock);
 
     $result = MigrationBacklogCheck::new()->run();
 
