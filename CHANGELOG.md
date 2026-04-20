@@ -1,3 +1,3 @@
 # Changelog
 
-All notable changes to `healthcheck-pgvector` will be documented in this file.
+All notable changes to `healthcheck-migration` will be documented in this file.
