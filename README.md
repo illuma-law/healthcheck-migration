@@ -4,15 +4,15 @@
 [![Packagist License](https://img.shields.io/badge/Licence-MIT-blue)](http://choosealicense.com/licenses/mit/)
 [![Latest Stable Version](https://img.shields.io/packagist/v/illuma-law/healthcheck-migration?label=Version)](https://packagist.org/packages/illuma-law/healthcheck-migration)
 
-A focused migration extension health check for Spatie's [Laravel Health](https://spatie.be/docs/laravel-health/v1/introduction) package.
+A focused migration backlog health check for Spatie's [Laravel Health](https://spatie.be/docs/laravel-health/v1/introduction) package.
 
-This package provides a simple, direct health check to verify that the `vector` extension (migration) is properly installed and active in your PostgreSQL database. This is critical for applications that rely on migration for storing AI embeddings and running semantic/similarity searches.
+This package provides a simple, direct health check to verify that your application's database migrations are up to date.
 
 ## Features
 
-- **Version Detection:** Checks if the `vector` extension is enabled and reports the specific migration version installed.
-- **Configurable Strictness:** Choose whether a missing migration extension should return a Warning (degraded) or a Failure (broken) status for your application.
-- **Query Safety:** Safely handles database connection errors or missing tables, returning a failed state with the exception message instead of crashing the health check suite.
+- **Pending Migration Check:** Automatically detects if there are any pending database migrations that haven't been run yet.
+- **Migration Count:** Reports the exact number of pending migrations in the health summary and meta data.
+- **Detailed Meta:** Lists a sample of pending migration filenames for easier debugging via JSON endpoints.
 
 ## Installation
 
@@ -22,24 +22,6 @@ Require this package with composer:
 composer require illuma-law/healthcheck-migration
 ```
 
-## Configuration
-
-You can publish the config file with:
-
-```shell
-php artisan vendor:publish --tag="healthcheck-migration-config"
-```
-
-The `healthcheck-migration.php` config file allows you to define whether the check is strictly required by default. 
-
-```php
-return [
-    // If true, the check will FAIL when the extension is missing.
-    // If false, it will generate a WARNING instead.
-    'required' => false,
-];
-```
-
 ## Usage & Integration
 
 Register the check inside your application's health service provider (e.g. `AppServiceProvider` or a dedicated `HealthServiceProvider`), alongside your other Spatie Laravel Health checks:
@@ -47,25 +29,11 @@ Register the check inside your application's health service provider (e.g. `AppS
 ### Basic Registration
 
 ```php
-use IllumaLaw\HealthCheckMigration\MigrationExtensionCheck;
+use IllumaLaw\HealthCheckMigration\MigrationBacklogCheck;
 use Spatie\Health\Facades\Health;
 
 Health::checks([
-    MigrationExtensionCheck::new(),
-]);
-```
-
-### Fluent Configuration
-
-You can override the config file's default strictness on a per-check basis using the fluent `required()` method. 
-
-```php
-use IllumaLaw\HealthCheckMigration\MigrationExtensionCheck;
-use Spatie\Health\Facades\Health;
-
-Health::checks([
-    // Make the health check FAIL immediately if migration is missing
-    MigrationExtensionCheck::new()->required(true),
+    MigrationBacklogCheck::new(),
 ]);
 ```
 
@@ -73,10 +41,8 @@ Health::checks([
 
 The check interacts with the Spatie Health dashboard and JSON endpoints using these states:
 
-- **Ok:** The migration extension is installed. The short summary and meta data will include the exact installed version (e.g. `0.7.0`).
-- **Warning:** migration is missing, but `required` is set to `false`.
-- **Failed:** migration is missing and `required` is set to `true`.
-- **Failed (Exception):** The database query to `pg_extension` throws an exception (e.g., database connection down).
+- **Ok:** All database migrations have been successfully applied.
+- **Failed:** One or more database migrations are pending.
 
 ## Testing
 
