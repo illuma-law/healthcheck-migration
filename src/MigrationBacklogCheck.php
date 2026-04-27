@@ -28,7 +28,7 @@ final class MigrationBacklogCheck extends Check
         $result = Result::make()
             ->meta([
                 'pending_count' => $count,
-                'sample' => $pendingLines->take(8)->all(),
+                'sample'        => $pendingLines->take(8)->all(),
             ])
             ->shortSummary("{$count} pending");
 
